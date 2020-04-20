@@ -1,13 +1,17 @@
 package com.kkllor.download.impl;
 
+import com.google.gson.Gson;
 import com.kkllor.constants.ReportType;
 import com.kkllor.download.IDownloader;
+import com.kkllor.download.impl.entity.SHEntity;
 import com.kkllor.network.NetworkFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author kkllor
@@ -21,7 +25,8 @@ public class SHDownLoader implements IDownloader {
     public boolean downloadByCodes(ReportType reportType, String... codes) {
 
         for (String code : codes) {
-            getPdfUrl(reportType, code);
+            String pdfUrl = getPdfUrl(reportType, code);
+            System.out.println("pdf：" + pdfUrl);
         }
         return false;
     }
@@ -62,8 +67,25 @@ public class SHDownLoader implements IDownloader {
             return "";
         }
 
-        rawResponse.replaceAll("", "");
+        Pattern p = Pattern.compile("\\{\\S*\\}");
+        Matcher m = p.matcher(rawResponse);
+        if (m.find()) {
+            rawResponse = m.group();
+        } else {
+            logger.error("解析结果失败,rawResponse = " + rawResponse);
+            return "";
+        }
 
-        return "";
+        Gson gson = new Gson();
+        SHEntity shEntity = gson.fromJson(rawResponse, SHEntity.class);
+        for (SHEntity.ResultBean resultBean : shEntity.getResult()) {
+            if (reportType == ReportType.YEAR) {
+                if ("年报".equals(resultBean.getBULLETIN_TYPE())) {
+                    return "http://static.sse.com.cn" + resultBean.getURL();
+                }
+            }
+        }
+
+        return rawResponse;
     }
 }

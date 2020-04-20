@@ -8,7 +8,6 @@ public class Entrance {
 
     public static void main(String args[]) {
         Config.parse();
-
-        new SHDownLoader().downloadByCodes(ReportType.YEAR, "600258");
+        new SHDownLoader().downloadByCodes(ReportType.YEAR, "600519");
     }
 }
