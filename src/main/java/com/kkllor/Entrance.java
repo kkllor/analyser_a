@@ -13,7 +13,7 @@ public class Entrance {
 
     public static void main(String args[]) {
         Config.getInstance().parse();
-        Scanner scanner = new Scanner(System.in);
+     /*   Scanner scanner = new Scanner(System.in);
         String operation = inputCheck(scanner, "input 'download' or 'analyse' for following operations ", "unknown operation", str -> str.equals("download") || str.equals("analyse"));
         if ("download".equals(operation)) {
             String codes = inputCheck(scanner, "input stock codes,split with ',' ", "unknown operation", str -> str.split(",").length > 0);
@@ -37,7 +37,9 @@ public class Entrance {
             SHDownLoader.getInstance().exit();
         } else if ("analyse".equals(operation)) {
             new Analyser().analyse("600300");
-        }
+        }*/
+
+        new Analyser().analyse("600300");
     }
 
 
