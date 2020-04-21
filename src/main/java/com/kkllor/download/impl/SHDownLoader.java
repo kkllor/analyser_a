@@ -14,6 +14,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.concurrent.*;
 import java.util.regex.Matcher;
@@ -93,6 +96,17 @@ public class SHDownLoader implements IDownloader {
         return false;
     }
 
+    @Override
+    public boolean downloadByCodes(ReportType reportType, int[] years, String... codes) {
+        if (years.length == 0) {
+            throw new RuntimeException("year must not empty!");
+        }
+        for (int y : years) {
+            downloadByCodes(reportType, y, codes);
+        }
+        return false;
+    }
+
 
     private void getReportUrl(Report report) {
         HashMap<String, String> params = new HashMap<>();
@@ -105,7 +119,12 @@ public class SHDownLoader implements IDownloader {
         params.put("reportType2", "DQBG");
         params.put("reportType", report.getReportType() == ReportType.YEAR ? "YEARLY" : "");
         params.put("beginDate", (report.getBelongYear() + 1) + "-01-01");
-        params.put("endDate", (report.getBelongYear() + 2) + "-01-01");
+        if (report.getBelongYear() + 2 > Calendar.getInstance().get(Calendar.YEAR)) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            params.put("endDate", sdf.format(new Date()));
+        } else {
+            params.put("endDate", (report.getBelongYear() + 2) + "-01-01");
+        }
         params.put("pageHelp.pageSize", "25");
         params.put("pageHelp.pageCount", "50");
         params.put("pageHelp.pageNo", "1");
@@ -147,5 +166,9 @@ public class SHDownLoader implements IDownloader {
                 }
             }
         }
+    }
+
+    public void exit() {
+        pools.shutdown();
     }
 }

@@ -44,11 +44,8 @@ public class ApacheNetwork implements INetwork {
         CloseableHttpResponse response2 = httpclient.execute(httpPost);
         BufferedReader rd = null;
         try {
-            System.out.println(response2.getStatusLine());
             HttpEntity entity2 = response2.getEntity();
             String responseString = EntityUtils.toString(entity2, "UTF-8");
-            System.out.println(responseString);
-            // and ensure it is fully consumed
             EntityUtils.consume(entity2);
             return responseString;
         } finally {

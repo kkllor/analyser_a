@@ -8,4 +8,6 @@ public interface IDownloader {
 
     boolean downloadByCodes(ReportType reportType, int year, String... codes);
 
+    boolean downloadByCodes(ReportType reportType, int[] year, String... codes);
+
 }
