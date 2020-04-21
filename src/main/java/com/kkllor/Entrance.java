@@ -1,5 +1,6 @@
 package com.kkllor;
 
+import com.kkllor.analysis.Analyser;
 import com.kkllor.config.Config;
 import com.kkllor.constants.ReportType;
 import com.kkllor.download.impl.SHDownLoader;
@@ -35,7 +36,7 @@ public class Entrance {
             SHDownLoader.getInstance().downloadByCodes(reportType1, a2, codes.split(","));
             SHDownLoader.getInstance().exit();
         } else if ("analyse".equals(operation)) {
-            System.out.println("开始分析。。。。");
+            new Analyser().analyse("600300");
         }
     }
 

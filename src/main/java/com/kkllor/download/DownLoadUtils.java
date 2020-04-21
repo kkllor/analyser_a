@@ -29,14 +29,20 @@ public class DownLoadUtils {
             typeFile.mkdir();
         }
 
+        File yearFile = new File(typeFile.getAbsolutePath() + File.separator + report.getBelongYear());
+        if (!yearFile.exists()) {
+            yearFile.mkdir();
+        }
+
+
         if (report.getBelongQuater() != null) {
-            File qFile = new File(typeFile.getAbsolutePath() + File.separator + report.getBelongQuater().getValue());
+            File qFile = new File(yearFile.getAbsolutePath() + File.separator + report.getBelongQuater().getValue());
             if (!qFile.exists()) {
                 qFile.mkdir();
             }
             parentDir = qFile.getAbsolutePath();
         } else {
-            parentDir = typeFile.getAbsolutePath();
+            parentDir = yearFile.getAbsolutePath();
         }
         String url = report.getUrl();
         int position = url.lastIndexOf("/");
