@@ -24,7 +24,7 @@ public class Config {
         static Config config = new Config();
     }
 
-    public static void parse() {
+    public void parse() {
         InputStream inputStream = Config.class.getClassLoader().getResourceAsStream("config.properties");
         Properties prop = new Properties();
 
@@ -35,10 +35,23 @@ public class Config {
 
         try {
             prop.load(inputStream);
+            downloadPath = prop.getProperty("download_folder");
+            if (downloadPath.startsWith("~")) {
+                downloadPath = downloadPath.replaceFirst("~", System.getProperty("user.home"));
+            }
+            maxDownload = Integer.parseInt(prop.getProperty("max_download_simultaneously"));
         } catch (IOException e) {
             e.printStackTrace();
             logger.warn("exception occurred when parse config.properties!");
         }
         logger.debug("config success!");
+    }
+
+    public String getDownloadPath() {
+        return downloadPath;
+    }
+
+    public int getMaxDownload() {
+        return maxDownload;
     }
 }

@@ -1,5 +1,7 @@
 package com.kkllor.network;
 
+import com.kkllor.download.entity.Report;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
@@ -12,5 +14,5 @@ public interface INetwork {
 
     String post(String url, HashMap<String, String> params, HashMap<String, String> headers) throws IOException;
 
-    boolean downLoad(String url, HashMap<String, Object> headers, String localPath);
+    boolean downLoad(Report report) throws IOException;
 }

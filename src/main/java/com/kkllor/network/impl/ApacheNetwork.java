@@ -1,18 +1,21 @@
 package com.kkllor.network.impl;
 
+import com.kkllor.download.entity.Report;
 import com.kkllor.network.INetwork;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -57,7 +60,22 @@ public class ApacheNetwork implements INetwork {
     }
 
     @Override
-    public boolean downLoad(String url, HashMap<String, Object> headers, String localPath) {
-        return false;
+    public boolean downLoad(Report report) throws IOException {
+        CloseableHttpClient client = HttpClientBuilder.create().build();
+        HttpGet request = new HttpGet(report.getUrl());
+        HttpResponse response = client.execute(request);
+        HttpEntity entity = response.getEntity();
+        BufferedInputStream bis = new BufferedInputStream(entity.getContent());
+        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(report.getLocalPath()));
+        byte[] bytes = new byte[2048];
+        int readBytes;
+        while ((readBytes = bis.read(bytes, 0, 2048)) != -1) {
+            bos.write(bytes, 0, readBytes);
+        }
+        bos.flush();
+        bis.close();
+        bos.close();
+        client.close();
+        return true;
     }
 }

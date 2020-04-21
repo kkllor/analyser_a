@@ -7,7 +7,7 @@ import com.kkllor.download.impl.SHDownLoader;
 public class Entrance {
 
     public static void main(String args[]) {
-        Config.parse();
-        new SHDownLoader().downloadByCodes(ReportType.YEAR, "600519");
+        Config.getInstance().parse();
+        SHDownLoader.getInstance().downloadByCodes(ReportType.YEAR,2015, "600519");
     }
 }
