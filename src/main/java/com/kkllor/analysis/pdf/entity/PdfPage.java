@@ -8,6 +8,7 @@ import java.util.List;
  * @date 2020/4/22 下午3:48
  */
 public class PdfPage {
+    private long lineOffset;
     private int pageNo;
     private List<PdfLine> pdfLines = new ArrayList<>();
 
@@ -29,6 +30,14 @@ public class PdfPage {
 
     public void addLine(PdfLine pdfLine) {
         pdfLines.add(pdfLine);
+    }
+
+    public long getLineOffset() {
+        return lineOffset;
+    }
+
+    public void setLineOffset(long lineOffset) {
+        this.lineOffset = lineOffset;
     }
 }
 
