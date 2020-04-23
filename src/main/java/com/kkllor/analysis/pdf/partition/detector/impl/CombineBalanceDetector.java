@@ -1,13 +1,19 @@
 package com.kkllor.analysis.pdf.partition.detector.impl;
 
+import com.kkllor.analysis.pdf.entity.Item;
 import com.kkllor.analysis.pdf.entity.PdfLine;
 import com.kkllor.analysis.pdf.entity.PdfPage;
 import com.kkllor.analysis.pdf.entity.WordLocation;
+import com.kkllor.analysis.pdf.partition.ItemClassifier;
 import com.kkllor.analysis.pdf.partition.KeyAreaType;
 import com.kkllor.analysis.pdf.partition.detector.IDetector;
+import com.kkllor.constants.FlowAssets;
+import com.kkllor.constants.ItemType;
+import org.apache.http.util.TextUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,11 +21,10 @@ import java.util.List;
  * @author kkllor
  * @date 2020/4/23 上午8:57
  */
-public class CombineBalanceDetector implements IDetector<CombineBalanceResult> {
-
+public class CombineBalanceDetector implements IDetector<BalanceResult> {
 
     private Logger logger = LogManager.getLogger(CombineBalanceDetector.class.getSimpleName());
-    private CombineBalanceResult combineBalanceResult;
+    private BalanceResult combineBalanceResult = new BalanceResult();
 
     boolean isFindBegin;
 
@@ -113,43 +118,43 @@ public class CombineBalanceDetector implements IDetector<CombineBalanceResult> {
             qcye = new Section(qmyeocation.getX() + qmyeocation.getWidth(), 2048);
         }
 
-
-        StringBuilder stringBuilder = new StringBuilder();
+        ItemType itemType = null;
+        BigDecimal preValue = null, currentValue = null;
         for (WordLocation wordLocation : pdfLine.getWordLocations()) {
             Section section = new Section(wordLocation.getX(), wordLocation.getX() + wordLocation.getWidth());
             if (xm.isInclude(section)) {
-                stringBuilder.append("项目");
-                stringBuilder.append(":");
-                stringBuilder.append(wordLocation.getValue());
-                stringBuilder.append("  ");
+                itemType = ItemClassifier.getItemTypeByName(wordLocation.getValue());
             } else if (fz.isInclude(section)) {
-                stringBuilder.append("附注");
-                stringBuilder.append(":");
-                stringBuilder.append(wordLocation.getValue());
-                stringBuilder.append("  ");
-            } else if (qmye.isInclude(section)) {
-                stringBuilder.append("期末余额");
-                stringBuilder.append(":");
-                stringBuilder.append(wordLocation.getValue());
-                stringBuilder.append("  ");
-            } else if (qcye.isInclude(section)) {
-                stringBuilder.append("期初余额");
-                stringBuilder.append(":");
-                stringBuilder.append(wordLocation.getValue());
-                stringBuilder.append("  ");
+            } else if (qmye.isInclude(section) && itemType != null) {
+                currentValue = covert(wordLocation.getValue());
+            } else if (qcye.isInclude(section) && itemType != null) {
+                preValue = covert(wordLocation.getValue());
+            }
+        }
+        if (itemType != null) {
+            if (itemType instanceof FlowAssets) {
+                Item item = new Item(itemType, preValue, currentValue);
+                combineBalanceResult.getFlowAssets().add(item);
             }
 
         }
-        System.out.println(stringBuilder);
+    }
+
+    private BigDecimal covert(String s) {
+        if (TextUtils.isEmpty(s)) {
+            return BigDecimal.ZERO;
+        }
+        s = s.trim().replaceAll(",", "");
+        return new BigDecimal(s);
     }
 
     @Override
-    public List<CombineBalanceResult> collectResult() {
+    public List<BalanceResult> collectResult() {
         return new ArrayList<>();
     }
 
     @Override
-    public CombineBalanceResult result() {
+    public BalanceResult result() {
         return combineBalanceResult;
     }
 

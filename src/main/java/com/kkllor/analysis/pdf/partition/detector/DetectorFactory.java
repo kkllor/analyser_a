@@ -3,8 +3,8 @@ package com.kkllor.analysis.pdf.partition.detector;
 import com.kkllor.analysis.pdf.partition.KeyAreaType;
 import com.kkllor.analysis.pdf.partition.detector.impl.CombineBalanceDetector;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author kkllor
@@ -20,9 +20,9 @@ public class DetectorFactory {
         return null;
     }
 
-    public static List<IDetector> getSupportDetectors() {
-        List<IDetector> detectors = new ArrayList<>();
-        detectors.add(getDetector(KeyAreaType.COMBINE_BALANCE));
-        return detectors;
+    public static Map<KeyAreaType, IDetector> getSupportDetectors() {
+        Map<KeyAreaType, IDetector> hashMap = new HashMap<>();
+        hashMap.put(KeyAreaType.COMBINE_BALANCE, getDetector(KeyAreaType.COMBINE_BALANCE));
+        return hashMap;
     }
 }
