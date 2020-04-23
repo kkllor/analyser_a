@@ -94,7 +94,7 @@ public class PdfLine {
                 return false;
             }
             for (WordLocation wordLocation : wordLocations) {
-                if (word.equals(wordLocation.getValue())) {
+                if (wordLocation.getValue().contains(word)) {
                     searchResult.put(word, 1);
                     return true;
                 }

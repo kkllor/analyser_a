@@ -27,33 +27,47 @@ public class PdfTest extends PDFTextStripper {
 
     public static void main(String[] args)
             throws Exception {
-        PDDocument pdd = null;
-        try {
-            pdd = PDDocument.load(new File("/Users/zhanggaokai/analyser/reports/600519/年报/2016/600519_2016_n.pdf"));
-            PDFParserTextStripper stripper = new PDFParserTextStripper();
-            stripper.setSortByPosition(true);
-            stripper.setStartPage(0);
-            stripper.setEndPage(160);
-            Writer dummy = new OutputStreamWriter(new ByteArrayOutputStream());
-            stripper.writeText(pdd, dummy);
-            stripper.detected();
 
 
-            new KeyAreaDetector().beginDetect(stripper.getPages());
+        String[] paths = new String[]{
+                "/Users/zhanggaokai/analyser/reports/600519/年报/2016/600519_2016_n.pdf"
+//                , "/Users/zhanggaokai/analyser/reports/600519/年报/2017/600519_2017_n.pdf"
+//                , "/Users/zhanggaokai/analyser/reports/600519/年报/2018/600519_2018_n.pdf"
+//                , "/Users/zhanggaokai/analyser/reports/600258/年报/2016/600258_2016_n.pdf"
+//                , "/Users/zhanggaokai/analyser/reports/600258/年报/2017/600258_2017_n.pdf"
+//                , "/Users/zhanggaokai/analyser/reports/600258/年报/2018/600258_2018_n.pdf"
 
+        };
 
-        } catch (IOException e) {
-            // throw error
-            e.printStackTrace();
-        } finally {
-            if (pdd != null) {
-                try {
-                    pdd.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
+        for (String path : paths) {
+            PDDocument pdd = null;
+            try {
+                pdd = PDDocument.load(new File(path));
+                PDFParserTextStripper stripper = new PDFParserTextStripper();
+                stripper.setSortByPosition(true);
+                stripper.setStartPage(0);
+                stripper.setEndPage(160);
+                Writer dummy = new OutputStreamWriter(new ByteArrayOutputStream());
+                stripper.writeText(pdd, dummy);
+                stripper.detected();
+                new KeyAreaDetector().beginDetect(stripper.getPages());
+
+                System.out.println("############################################################################################################################################");
+            } catch (IOException e) {
+                // throw error
+                e.printStackTrace();
+            } finally {
+                if (pdd != null) {
+                    try {
+                        pdd.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
+
+
     }
 
     static class PDFParserTextStripper extends PDFTextStripper {
@@ -206,7 +220,7 @@ public class PdfTest extends PDFTextStripper {
             int pageNo = 0;
             for (int i = 0; i < wordLocations.size(); i++) {
                 WordLocation wordLocation = wordLocations.get(i);
-                if (tmpY == -1 || wordLocation.getY() != tmpY) {
+                if (tmpY == -1 || Math.abs(wordLocation.getY() - tmpY) > 2) {
                     tmpLine = new PdfLine();
                     tmpLine.setLineNo(pageNo);
                     tmpLine.setGlobalLineNo(currentPage.getLineOffset() + pageNo);

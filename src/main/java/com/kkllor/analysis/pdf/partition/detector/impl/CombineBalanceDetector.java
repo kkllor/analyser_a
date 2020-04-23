@@ -2,6 +2,7 @@ package com.kkllor.analysis.pdf.partition.detector.impl;
 
 import com.kkllor.analysis.pdf.entity.PdfLine;
 import com.kkllor.analysis.pdf.entity.PdfPage;
+import com.kkllor.analysis.pdf.entity.WordLocation;
 import com.kkllor.analysis.pdf.partition.KeyAreaType;
 import com.kkllor.analysis.pdf.partition.detector.IDetector;
 import org.apache.logging.log4j.LogManager;
@@ -29,6 +30,9 @@ public class CombineBalanceDetector implements IDetector<CombineBalanceResult> {
     private int beginPageNo, beginLineNo, endPageNo, endLineNo;
     private long globalBeginLineNo, globalEndLineNo;
 
+    private Section xm, fz, qmye, qcye;
+
+
     @Override
     public KeyAreaType getType() {
         return KeyAreaType.COMBINE_BALANCE;
@@ -37,12 +41,6 @@ public class CombineBalanceDetector implements IDetector<CombineBalanceResult> {
     @Override
     public void onPageStarted(PdfPage page) {
         currentPage = page;
-        if (!isFindBegin) {
-            logger.info("begin:   pageNo" + page.getPageNo() + ",isFindBegin = " + false);
-        } else {
-            logger.info("begin:   pageNo" + page.getPageNo() + ",isFindBegin = " + true + ", isFindEnd = " + isFindEnd);
-        }
-
     }
 
     @Override
@@ -69,15 +67,12 @@ public class CombineBalanceDetector implements IDetector<CombineBalanceResult> {
                 }
             }
         } else {
-
-
             if (!isFindEnd) {
-                if (pdfLine.getGlobalLineNo() > globalBeginLineNo+1) {
-                    PdfLine prePage = pdfLine.getRelativePage(-1);
-                    if (prePage != null && prePage.containWord("负债和所有者权益总计")) {
+                if (pdfLine.getGlobalLineNo() > globalBeginLineNo + 1) {
+                    if (pdfLine != null && pdfLine.containWord("法定代表人：")) {
                         endPageNo = currentPage.getPageNo();
-                        endLineNo = prePage.getLineNo();
-                        globalEndLineNo = prePage.getGlobalLineNo();
+                        endLineNo = pdfLine.getLineNo() - 1;
+                        globalEndLineNo = pdfLine.getGlobalLineNo() - 1;
                         isFindEnd = true;
                         logger.info("find end pageNo = " + endPageNo + ", lineNo = " + endLineNo + ", globalLineNo = " + globalEndLineNo);
                     }
@@ -85,16 +80,67 @@ public class CombineBalanceDetector implements IDetector<CombineBalanceResult> {
             }
         }
 
-        if (isFindBegin && !isFindBegin
-                && currentPage.getPageNo() >= beginPageNo
-                && pdfLine.getLineNo() > beginLineNo) {
+        if (isFindBegin && !isFindEnd
+                && pdfLine.getGlobalLineNo() >= globalBeginLineNo) {
             extractData(pdfLine);
         }
     }
 
 
     private void extractData(PdfLine pdfLine) {
+        //计算表格
+        if (pdfLine.getGlobalLineNo() == globalBeginLineNo) {
+            WordLocation xmLocation = null;
+            WordLocation fzLocation = null;
+            WordLocation qmyeocation = null;
+            WordLocation qcyeLocation = null;
 
+            for (WordLocation location : pdfLine.getWordLocations()) {
+                if ("项目".equals(location.getValue())) {
+                    xmLocation = location;
+                } else if ("附注".equals(location.getValue())) {
+                    fzLocation = location;
+                } else if ("期末余额".equals(location.getValue())) {
+                    qmyeocation = location;
+                } else if ("期初余额".equals(location.getValue())) {
+                    qcyeLocation = location;
+                }
+            }
+
+            xm = new Section(0, fzLocation.getX());
+            fz = new Section(xmLocation.getX() + xmLocation.getWidth(), qmyeocation.getX());
+            qmye = new Section(fzLocation.getX() + fzLocation.getWidth(), qcyeLocation.getX());
+            qcye = new Section(qmyeocation.getX() + qmyeocation.getWidth(), 2048);
+        }
+
+
+        StringBuilder stringBuilder = new StringBuilder();
+        for (WordLocation wordLocation : pdfLine.getWordLocations()) {
+            Section section = new Section(wordLocation.getX(), wordLocation.getX() + wordLocation.getWidth());
+            if (xm.isInclude(section)) {
+                stringBuilder.append("项目");
+                stringBuilder.append(":");
+                stringBuilder.append(wordLocation.getValue());
+                stringBuilder.append("  ");
+            } else if (fz.isInclude(section)) {
+                stringBuilder.append("附注");
+                stringBuilder.append(":");
+                stringBuilder.append(wordLocation.getValue());
+                stringBuilder.append("  ");
+            } else if (qmye.isInclude(section)) {
+                stringBuilder.append("期末余额");
+                stringBuilder.append(":");
+                stringBuilder.append(wordLocation.getValue());
+                stringBuilder.append("  ");
+            } else if (qcye.isInclude(section)) {
+                stringBuilder.append("期初余额");
+                stringBuilder.append(":");
+                stringBuilder.append(wordLocation.getValue());
+                stringBuilder.append("  ");
+            }
+
+        }
+        System.out.println(stringBuilder);
     }
 
     @Override
@@ -110,5 +156,18 @@ public class CombineBalanceDetector implements IDetector<CombineBalanceResult> {
     @Override
     public boolean isUnique() {
         return true;
+    }
+
+    public static class Section {
+        private final double start, end;
+
+        public Section(double start, double end) {
+            this.start = start;
+            this.end = end;
+        }
+
+        public boolean isInclude(Section section) {
+            return section.start >= start && section.end <= end;
+        }
     }
 }
