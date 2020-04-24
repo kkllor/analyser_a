@@ -1,76 +1,17 @@
-package com.kkllor;
+package com.kkllor.analysis;
 
-/**
- * @author kkllor
- * @date 2020/4/22 上午9:37
- */
-
-import com.kkllor.analysis.pdf.KeyAreaDetector;
 import com.kkllor.analysis.pdf.entity.PdfLine;
 import com.kkllor.analysis.pdf.entity.PdfPage;
 import com.kkllor.analysis.pdf.entity.WordLocation;
-import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PdfTest extends PDFTextStripper {
-
-    public PdfTest()
-            throws IOException {
-        super.setSortByPosition(true);
-    }
-
-    public static void main(String[] args)
-            throws Exception {
-
-
-        String[] paths = new String[]{
-                "/Users/zhanggaokai/analyser/reports/600519/年报/2016/600519_2016_n.pdf"
-//                , "/Users/zhanggaokai/analyser/reports/600519/年报/2017/600519_2017_n.pdf"
-//                , "/Users/zhanggaokai/analyser/reports/600519/年报/2018/600519_2018_n.pdf"
-//                , "/Users/zhanggaokai/analyser/reports/600258/年报/2016/600258_2016_n.pdf"
-//                , "/Users/zhanggaokai/analyser/reports/600258/年报/2017/600258_2017_n.pdf"
-//                , "/Users/zhanggaokai/analyser/reports/600258/年报/2018/600258_2018_n.pdf"
-
-        };
-
-        for (String path : paths) {
-            PDDocument pdd = null;
-            try {
-                pdd = PDDocument.load(new File(path));
-                PDFParserTextStripper stripper = new PDFParserTextStripper();
-                stripper.setSortByPosition(true);
-                stripper.setStartPage(0);
-                stripper.setEndPage(160);
-                Writer dummy = new OutputStreamWriter(new ByteArrayOutputStream());
-                stripper.writeText(pdd, dummy);
-                stripper.detected();
-                new KeyAreaDetector().beginDetect(stripper.getPages());
-
-                System.out.println("############################################################################################################################################");
-            } catch (IOException e) {
-                // throw error
-                e.printStackTrace();
-            } finally {
-                if (pdd != null) {
-                    try {
-                        pdd.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-
-
-    }
-
-    static class PDFParserTextStripper extends PDFTextStripper {
+class PDFParserTextStripper extends PDFTextStripper {
 
         private List<WordLocation> wordLocations = new ArrayList<>();
         private List<PdfPage> pages = new ArrayList<>();
@@ -83,11 +24,7 @@ public class PdfTest extends PDFTextStripper {
 
         @Override
         protected void writeString(String string, List<TextPosition> textPositions) throws IOException {
-//            System.out.println("~~~~~~~~~~~~~~~");
-//            System.out.println(string);
             String[] words = string.split("\\s+");
-//            System.out.println(Arrays.toString(words));
-
             int index = 0;
             int length = textPositions.size();
             for (String word : words) {
@@ -214,7 +151,7 @@ public class PdfTest extends PDFTextStripper {
         }
 
 
-        private void detected() {
+        public void detected() {
             double tmpY = -1;
             PdfLine tmpLine = null;
             int pageNo = 0;
@@ -249,4 +186,3 @@ public class PdfTest extends PDFTextStripper {
             }
         }
     }
-}

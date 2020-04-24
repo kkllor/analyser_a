@@ -4,17 +4,15 @@ import com.kkllor.analysis.Analyser;
 import com.kkllor.config.Config;
 import com.kkllor.constants.ReportType;
 import com.kkllor.download.impl.SHDownLoader;
-import com.sun.org.apache.xpath.internal.functions.Function2Args;
 
 import java.util.Scanner;
-import java.util.function.Function;
 
 public class Entrance {
 
     public static void main(String args[]) {
         Config.getInstance().parse();
         Scanner scanner = new Scanner(System.in);
-        String operation = inputCheck(scanner, "input 'download' or 'analyse' for following operations ", "unknown operation", str -> str.equals("download") || str.equals("analyse"));
+        String operation = inputCheck(scanner, "input 'download' or 'analyse' ,'collect' for following operations ", "unknown operation", str -> str.equals("download") || str.equals("analyse") || str.equals("collect"));
         if ("download".equals(operation)) {
             String codes = inputCheck(scanner, "input stock codes,split with ',' ", "unknown operation", str -> str.split(",").length > 0);
             String years = inputCheck(scanner, "input download year,split with ',' ", "unknown years", str -> str.split(",").length > 0);
@@ -35,6 +33,9 @@ public class Entrance {
             }
             SHDownLoader.getInstance().downloadByCodes(reportType1, a2, codes.split(","));
             SHDownLoader.getInstance().exit();
+        } else if ("collect".equals(operation)) {
+            String code = inputCheck(scanner, "input stock code ", "unknown operation", str -> str.split(",").length > 0);
+            new Analyser().collectData(code);
         } else if ("analyse".equals(operation)) {
             new Analyser().analyse("600300");
         }
