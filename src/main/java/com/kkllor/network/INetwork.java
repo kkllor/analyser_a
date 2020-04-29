@@ -14,5 +14,7 @@ public interface INetwork {
 
     String post(String url, HashMap<String, String> params, HashMap<String, String> headers) throws IOException;
 
+    String postString(String url, String params, HashMap<String, String> headers) throws IOException;
+
     boolean downLoad(Report report) throws IOException;
 }

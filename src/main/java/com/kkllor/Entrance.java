@@ -4,8 +4,9 @@ import com.kkllor.analysis.Analyser;
 import com.kkllor.config.Config;
 import com.kkllor.constants.ReportType;
 import com.kkllor.download.impl.SHDownLoader;
+import com.kkllor.download.impl.SZDownLoader;
 
-import java.util.Scanner;
+import java.util.*;
 
 public class Entrance {
 
@@ -31,8 +32,18 @@ public class Entrance {
             } else {
                 reportType1 = ReportType.OTHER;
             }
-            SHDownLoader.getInstance().downloadByCodes(reportType1, a2, codes.split(","));
-            SHDownLoader.getInstance().exit();
+
+            Map<String, String[]> codesMap = groupCodes(codes.split(","));
+            if (codesMap.get("sh").length > 0) {
+                SHDownLoader.getInstance().downloadByCodes(reportType1, a2, codesMap.get("sh"));
+                SHDownLoader.getInstance().exit();
+            }
+
+            if (codesMap.get("sz").length > 0) {
+                SZDownLoader.getInstance().downloadByCodes(reportType1, a2, codesMap.get("sz"));
+                SZDownLoader.getInstance().exit();
+            }
+
         } else if ("collect".equals(operation)) {
             String code = inputCheck(scanner, "input stock code ", "unknown operation", str -> str.split(",").length > 0);
             new Analyser().collectData(code);
@@ -55,4 +66,30 @@ public class Entrance {
         boolean operation(String input);
     }
 
+
+    private static Map<String, String[]> groupCodes(String[] codes) {
+        List<String> shList = new ArrayList<>();
+        List<String> szList = new ArrayList<>();
+        Map<String, String[]> resultMap = new HashMap<>();
+
+        for (String code : codes) {
+            if (code.startsWith("00")) {
+                szList.add(code);
+            } else if (code.startsWith("60")) {
+                shList.add(code);
+            }
+        }
+        String[] shCodes = new String[shList.size()];
+        for (int i = 0; i < shCodes.length; i++) {
+            shCodes[i] = shList.get(i);
+        }
+
+        String[] szCodes = new String[szList.size()];
+        for (int i = 0; i < szCodes.length; i++) {
+            szCodes[i] = szList.get(i);
+        }
+        resultMap.put("sh", shCodes);
+        resultMap.put("sz", szCodes);
+        return resultMap;
+    }
 }

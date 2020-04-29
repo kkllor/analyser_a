@@ -9,6 +9,8 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
@@ -41,6 +43,30 @@ public class ApacheNetwork implements INetwork {
             httpPost.addHeader(key, headers.get(key));
         }
         httpPost.setEntity(new UrlEncodedFormEntity(nvps));
+        CloseableHttpResponse response2 = httpclient.execute(httpPost);
+        BufferedReader rd = null;
+        try {
+            HttpEntity entity2 = response2.getEntity();
+            String responseString = EntityUtils.toString(entity2, "UTF-8");
+            EntityUtils.consume(entity2);
+            return responseString;
+        } finally {
+            response2.close();
+            if (rd != null) {
+                rd.close();
+            }
+        }
+    }
+
+    @Override
+    public String postString(String url, String params, HashMap<String, String> headers) throws IOException {
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost(url);
+
+        for (String key : headers.keySet()) {
+            httpPost.addHeader(key, headers.get(key));
+        }
+        httpPost.setEntity(new StringEntity(params, ContentType.APPLICATION_FORM_URLENCODED));
         CloseableHttpResponse response2 = httpclient.execute(httpPost);
         BufferedReader rd = null;
         try {
