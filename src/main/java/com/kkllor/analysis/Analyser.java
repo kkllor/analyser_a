@@ -62,7 +62,7 @@ public class Analyser {
                 PDFParserTextStripper stripper = new PDFParserTextStripper();
                 stripper.setSortByPosition(true);
                 stripper.setStartPage(0);
-                stripper.setEndPage(160);
+                stripper.setEndPage(pdd.getNumberOfPages());
                 Writer dummy = new OutputStreamWriter(new ByteArrayOutputStream());
                 stripper.writeText(pdd, dummy);
                 stripper.detected();

@@ -60,7 +60,7 @@ public class CombineBalanceDetector implements IDetector<BalanceResult> {
                 int nextLine = 1;
                 while (nextLine <= 5) {
                     PdfLine tmp = pdfLine.getRelativePage(nextLine);
-                    if (tmp != null && tmp.containWordAnd("项目", "附注", "期末余额", "期初余额")) {
+                    if (tmp != null && tmp.containWordAnd("项目",/* "附注",*/ "期末余额", "期初余额")) {
                         isFindBegin = true;
                         beginPageNo = currentPage.getPageNo();
                         beginLineNo = tmp.getLineNo();
@@ -112,10 +112,16 @@ public class CombineBalanceDetector implements IDetector<BalanceResult> {
                 }
             }
 
-            xm = new Section(0, fzLocation.getX());
-            fz = new Section(xmLocation.getX() + xmLocation.getWidth(), qmyeocation.getX());
-            qmye = new Section(fzLocation.getX() + fzLocation.getWidth(), qcyeLocation.getX());
-            qcye = new Section(qmyeocation.getX() + qmyeocation.getWidth(), 2048);
+            if (fzLocation == null) {
+                xm = new Section(0, qmyeocation.getX());
+                qmye = new Section(xmLocation.getX() + xmLocation.getWidth(), qcyeLocation.getX());
+                qcye = new Section(qmyeocation.getX() + qmyeocation.getWidth(), 2048);
+            } else {
+                xm = new Section(0, fzLocation.getX());
+                fz = new Section(xmLocation.getX() + xmLocation.getWidth(), qmyeocation.getX());
+                qmye = new Section(fzLocation.getX() + fzLocation.getWidth(), qcyeLocation.getX());
+                qcye = new Section(qmyeocation.getX() + qmyeocation.getWidth(), 2048);
+            }
         }
 
         ItemType itemType = null;
@@ -124,8 +130,8 @@ public class CombineBalanceDetector implements IDetector<BalanceResult> {
             Section section = new Section(wordLocation.getX(), wordLocation.getX() + wordLocation.getWidth());
             if (xm.isInclude(section)) {
                 itemType = ItemClassifier.getItemTypeByName(wordLocation.getValue());
-            } else if (fz.isInclude(section)) {
-            } else if (qmye.isInclude(section) && itemType != null) {
+            }/* else if (fz.isInclude(section)) {
+            } */ else if (qmye.isInclude(section) && itemType != null) {
                 currentValue = covert(wordLocation.getValue());
             } else if (qcye.isInclude(section) && itemType != null) {
                 preValue = covert(wordLocation.getValue());

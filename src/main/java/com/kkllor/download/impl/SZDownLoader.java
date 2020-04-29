@@ -142,8 +142,9 @@ public class SZDownLoader implements IDownloader {
         SZEntity szEntity = gson.fromJson(rawResponse, SZEntity.class);
         for (SZEntity.DataBean dataBean : szEntity.getData()) {
             if (report.getReportType() == ReportType.YEAR) {
-                if (dataBean.getTitle().contains(report.getBelongYear() + "")) {
+                if (dataBean.getTitle().contains(report.getBelongYear() + "") && !dataBean.getTitle().contains("摘要")) {
                     report.setUrl("http://disc.static.szse.cn/download" + dataBean.getAttachPath());
+                    break;
                 }
             }
         }
