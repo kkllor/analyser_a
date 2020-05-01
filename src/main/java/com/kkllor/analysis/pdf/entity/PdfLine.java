@@ -58,11 +58,9 @@ public class PdfLine {
                 }
             }
         } else {
-            while (point <= offset) {
-                if (targetLine != null) {
-                    targetLine = targetLine.next;
-                    point++;
-                }
+            while (point <= offset && targetLine != null) {
+                targetLine = targetLine.next;
+                point++;
             }
         }
         return targetLine;

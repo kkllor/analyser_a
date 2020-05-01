@@ -23,6 +23,7 @@ import java.util.List;
  */
 public class CombineBalanceDetector implements IDetector<BalanceResult> {
 
+    private static final int DETECT_LINE = 10;
     private Logger logger = LogManager.getLogger(CombineBalanceDetector.class.getSimpleName());
     private BalanceResult combineBalanceResult = new BalanceResult();
 
@@ -58,7 +59,7 @@ public class CombineBalanceDetector implements IDetector<BalanceResult> {
         if (!isFindBegin) {
             if (pdfLine.containWord("合并资产负债表")) {
                 int nextLine = 1;
-                while (nextLine <= 5) {
+                while (nextLine <= DETECT_LINE) {
                     PdfLine tmp = pdfLine.getRelativePage(nextLine);
                     if (tmp != null && tmp.containWordAnd("项目",/* "附注",*/ "期末余额", "期初余额")) {
                         isFindBegin = true;
