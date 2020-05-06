@@ -1,5 +1,6 @@
 package com.kkllor.analysis.pdf.partition;
 
+import com.kkllor.constants.FixedAssets;
 import com.kkllor.constants.FlowAssets;
 import com.kkllor.constants.ItemType;
 
@@ -20,6 +21,15 @@ public class ItemClassifier {
             if (flowAssets.getAliases() != null && !flowAssets.getAliases().isEmpty()) {
                 for (String alias : flowAssets.getAliases()) {
                     typeMaps.put(alias, flowAssets);
+                }
+            }
+        }
+
+        for (FixedAssets fixedAssets : FixedAssets.values()) {
+            typeMaps.put(fixedAssets.getName(), fixedAssets);
+            if (fixedAssets.getAliases() != null && fixedAssets.getAliases().isEmpty()) {
+                for (String alias : fixedAssets.getAliases()) {
+                    typeMaps.put(alias, fixedAssets);
                 }
             }
         }
