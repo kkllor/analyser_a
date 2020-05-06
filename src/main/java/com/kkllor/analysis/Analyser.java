@@ -49,6 +49,9 @@ public class Analyser {
                     }
                     File[] fReport = yReport.listFiles();
                     for (File file : fReport) {
+                        if (file.getName().startsWith(".")) {
+                            continue;
+                        }
                         Report report = new Report();
                         report.setCompany(company);
                         report.setLocalPath(file.getAbsolutePath());

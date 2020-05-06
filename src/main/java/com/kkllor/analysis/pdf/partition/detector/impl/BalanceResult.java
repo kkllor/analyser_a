@@ -43,6 +43,11 @@ public class BalanceResult implements DetectorResult {
 
     @Override
     public boolean selfCheck() {
+        if (flowAssets.get(FlowAssets.yspjjyszk) != null) {
+            flowAssets.remove(FlowAssets.yspj);
+            flowAssets.remove(FlowAssets.yszk);
+        }
+
         BigDecimal total_prevalue = BigDecimal.ZERO;
         BigDecimal total_currentvalue = BigDecimal.ZERO;
         Item ldzchjItem = flowAssets.get(FlowAssets.ldzchj);

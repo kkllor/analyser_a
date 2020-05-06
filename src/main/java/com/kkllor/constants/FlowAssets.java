@@ -12,6 +12,8 @@ public enum FlowAssets implements ItemType{
     , jsbfj("结算备付金")
     , cczj("拆出资金")
     , ygyjzjlqjr("以公允价值计量且其变动计入当期损益的金融资产")
+    , ysjrzc("衍生金融资产")
+    , yspjjyszk("应收票据及应收账款")
     , yspj("应收票据")
     , yszk("应收账款")
     , ysbf("应收保费")
