@@ -1,8 +1,6 @@
 package com.kkllor.analysis.pdf.partition;
 
-import com.kkllor.constants.FixedAssets;
-import com.kkllor.constants.FlowAssets;
-import com.kkllor.constants.ItemType;
+import com.kkllor.constants.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +28,24 @@ public class ItemClassifier {
             if (fixedAssets.getAliases() != null && fixedAssets.getAliases().isEmpty()) {
                 for (String alias : fixedAssets.getAliases()) {
                     typeMaps.put(alias, fixedAssets);
+                }
+            }
+        }
+
+        for (FlowDebt flowDebt : FlowDebt.values()) {
+            typeMaps.put(flowDebt.getName(), flowDebt);
+            if (flowDebt.getAliases() != null && flowDebt.getAliases().isEmpty()) {
+                for (String alias : flowDebt.getAliases()) {
+                    typeMaps.put(alias, flowDebt);
+                }
+            }
+        }
+
+        for (FixDebt fixDebt : FixDebt.values()) {
+            typeMaps.put(fixDebt.getName(), fixDebt);
+            if (fixDebt.getAliases() != null && fixDebt.getAliases().isEmpty()) {
+                for (String alias : fixDebt.getAliases()) {
+                    typeMaps.put(alias, fixDebt);
                 }
             }
         }

@@ -7,9 +7,7 @@ import com.kkllor.analysis.pdf.entity.WordLocation;
 import com.kkllor.analysis.pdf.partition.ItemClassifier;
 import com.kkllor.analysis.pdf.partition.KeyAreaType;
 import com.kkllor.analysis.pdf.partition.detector.IDetector;
-import com.kkllor.constants.FixedAssets;
-import com.kkllor.constants.FlowAssets;
-import com.kkllor.constants.ItemType;
+import com.kkllor.constants.*;
 import org.apache.http.util.TextUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -176,6 +174,12 @@ public class CombineBalanceDetector implements IDetector<BalanceResult> {
             } else if (itemType instanceof FixedAssets) {
                 Item item = new Item(itemType, preValue, currentValue);
                 combineBalanceResult.getFixAssets().put((FixedAssets) itemType, item);
+            } else if (itemType instanceof FlowDebt) {
+                Item item = new Item(itemType, preValue, currentValue);
+                combineBalanceResult.getFlowDebts().put((FlowDebt) itemType, item);
+            } else if (itemType instanceof FixDebt) {
+                Item item = new Item(itemType, preValue, currentValue);
+                combineBalanceResult.getFixDebts().put((FixDebt) itemType, item);
             }
         }
     }

@@ -2,9 +2,7 @@ package com.kkllor.analysis.pdf.partition.detector.impl;
 
 import com.kkllor.analysis.pdf.entity.Item;
 import com.kkllor.analysis.pdf.partition.detector.DetectorResult;
-import com.kkllor.constants.FixedAssets;
-import com.kkllor.constants.FlowAssets;
-import com.kkllor.constants.ItemType;
+import com.kkllor.constants.*;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
@@ -20,12 +18,23 @@ public class BalanceResult implements DetectorResult {
     private Map<FlowAssets, Item> flowAssets = new LinkedHashMap<>();
     private Map<FixedAssets, Item> fixAssets = new LinkedHashMap<>();
 
+    private Map<FlowDebt, Item> flowDebts = new LinkedHashMap<>();
+    private Map<FixDebt, Item> fixDebts = new LinkedHashMap<>();
+
     public Map<FlowAssets, Item> getFlowAssets() {
         return flowAssets;
     }
 
     public Map<FixedAssets, Item> getFixAssets() {
         return fixAssets;
+    }
+
+    public Map<FlowDebt, Item> getFlowDebts() {
+        return flowDebts;
+    }
+
+    public Map<FixDebt, Item> getFixDebts() {
+        return fixDebts;
     }
 
     @Override
@@ -55,6 +64,29 @@ public class BalanceResult implements DetectorResult {
         }
 
 
+        stringBuilder.append("流动负债：\n");
+        for (Item item : flowDebts.values()) {
+            stringBuilder.append(item.getItemType().getName());
+            stringBuilder.append("   ");
+            stringBuilder.append("期末余额：");
+            stringBuilder.append(item.getCurrentValue());
+            stringBuilder.append("   ");
+            stringBuilder.append("期初余额：");
+            stringBuilder.append(item.getPreValue() + "\n");
+        }
+
+        stringBuilder.append("非流动负债：\n");
+        for (Item item : fixDebts.values()) {
+            stringBuilder.append(item.getItemType().getName());
+            stringBuilder.append("   ");
+            stringBuilder.append("期末余额：");
+            stringBuilder.append(item.getCurrentValue());
+            stringBuilder.append("   ");
+            stringBuilder.append("期初余额：");
+            stringBuilder.append(item.getPreValue() + "\n");
+        }
+
+
         return stringBuilder.toString();
     }
 
@@ -64,48 +96,56 @@ public class BalanceResult implements DetectorResult {
             flowAssets.remove(FlowAssets.yspj);
             flowAssets.remove(FlowAssets.yszk);
         }
-        boolean flowCheck = check(flowAssets, FlowAssets.ldzchj, "流动资产");
-        System.out.println("流动资产检查结果：" + flowCheck);
-        System.out.println();
-        System.out.println();
-        System.out.println();
-        boolean fixCheck = check(fixAssets, FixedAssets.fldzchj, "非流动资产");
-        System.out.println("非流动资产检查结果：" + fixCheck);
-        return flowCheck && fixCheck;
+        if (flowDebts.get(FlowDebt.yfpjjyfzk) != null) {
+            flowDebts.remove(FlowDebt.yfpj);
+            flowDebts.remove(FlowDebt.yfzk);
+        }
+
+        boolean flowAssetCheck = check(flowAssets, FlowAssets.ldzchj, "流动资产");
+        boolean fixAssetCheck = check(fixAssets, FixedAssets.fldzchj, "非流动资产");
+        boolean flowDebtCheck = check(flowDebts, FlowDebt.ldfzhj, "流动负债");
+        boolean fixDebtCheck = check(fixDebts, FixDebt.fldfzhj, "非流动负债");
+        return flowAssetCheck && fixAssetCheck && flowDebtCheck && fixDebtCheck;
     }
 
     private <T extends ItemType> boolean check(Map<T, Item> map, T readType, String name) {
-        BigDecimal calculate_prevalue = BigDecimal.ZERO;
-        BigDecimal calculate_currentvalue = BigDecimal.ZERO;
+        BigDecimal calculate_pre = BigDecimal.ZERO;
+        BigDecimal calculate_current = BigDecimal.ZERO;
         Item readItem = map.get(readType);
-        BigDecimal read_prevalue = readItem.getPreValue() == null ? BigDecimal.ZERO : readItem.getPreValue();
-        BigDecimal read_currentvalue = readItem.getCurrentValue() == null ? BigDecimal.ZERO : readItem.getCurrentValue();
+        BigDecimal read_pre = readItem.getPreValue() == null ? BigDecimal.ZERO : readItem.getPreValue();
+        BigDecimal read_current = readItem.getCurrentValue() == null ? BigDecimal.ZERO : readItem.getCurrentValue();
         for (Item item : map.values()) {
             if (item.getItemType() != readType) {
-                calculate_prevalue = calculate_prevalue.add(item.getPreValue() == null ? BigDecimal.ZERO : item.getPreValue());
-                calculate_currentvalue = calculate_currentvalue.add(item.getCurrentValue() == null ? BigDecimal.ZERO : item.getCurrentValue());
+                calculate_pre = calculate_pre.add(item.getPreValue() == null ? BigDecimal.ZERO : item.getPreValue());
+                calculate_current = calculate_current.add(item.getCurrentValue() == null ? BigDecimal.ZERO : item.getCurrentValue());
             }
         }
 
-        boolean isPreValueEqual = calculate_prevalue.equals(read_prevalue);
-        boolean isCurrentValueEqual = calculate_currentvalue.equals(read_currentvalue);
+        boolean isPreValueEqual = calculate_pre.equals(read_pre);
+        boolean isCurrentValueEqual = calculate_current.equals(read_current);
         StringBuilder stringBuilder = new StringBuilder("计算得知的");
         stringBuilder.append(name);
         stringBuilder.append("合计为：");
         stringBuilder.append("\n");
         stringBuilder.append("期初：");
-        stringBuilder.append(decimalFormat.format(calculate_prevalue));
+        stringBuilder.append(decimalFormat.format(calculate_pre));
         stringBuilder.append(", 期末：");
-        stringBuilder.append(decimalFormat.format(calculate_currentvalue));
+        stringBuilder.append(decimalFormat.format(calculate_current));
         stringBuilder.append("\n");
         stringBuilder.append("读取数值为：");
         stringBuilder.append("\n");
         stringBuilder.append("期初：");
-        stringBuilder.append(decimalFormat.format(read_prevalue));
+        stringBuilder.append(decimalFormat.format(read_pre));
         stringBuilder.append(", 期末：");
-        stringBuilder.append(decimalFormat.format(read_currentvalue));
-
+        stringBuilder.append(decimalFormat.format(read_current));
+        stringBuilder.append("\n");
+        stringBuilder.append(name);
+        stringBuilder.append("检查结果：");
+        stringBuilder.append(isPreValueEqual && isCurrentValueEqual);
+        stringBuilder.append("\n");
+        stringBuilder.append("\n");
         System.out.println(stringBuilder.toString());
+
         return isPreValueEqual && isCurrentValueEqual;
     }
 }
