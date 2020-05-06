@@ -5,6 +5,8 @@ import com.kkllor.config.Config;
 import com.kkllor.constants.ReportType;
 import com.kkllor.download.entity.Company;
 import com.kkllor.download.entity.Report;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.pdmodel.PDDocument;
 
 import java.io.*;
@@ -16,6 +18,8 @@ import java.util.List;
  * @date 2020/4/21 下午3:27
  */
 public class Analyser {
+    private Logger logger = LogManager.getLogger(Analyser.class.getSimpleName());
+
     public void collectData(String code) {
 
         Company company = new Company(code);
@@ -31,6 +35,10 @@ public class Analyser {
             }
         }
 
+        if (targetFile == null) {
+            logger.error("文件未找到！");
+            return;
+        }
         File[] types = targetFile.listFiles();
         for (File f : types) {
             if ("年报".equals(f.getName())) {

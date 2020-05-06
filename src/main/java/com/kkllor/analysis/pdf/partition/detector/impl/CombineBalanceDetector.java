@@ -38,6 +38,9 @@ public class CombineBalanceDetector implements IDetector<BalanceResult> {
 
     private Section xm, fz, qmye, qcye;
 
+    private List<Long> ignoreLines = new ArrayList<>();
+
+    private static final String ygyjzbdjr = "以公允价值计量";
 
     @Override
     public KeyAreaType getType() {
@@ -56,6 +59,9 @@ public class CombineBalanceDetector implements IDetector<BalanceResult> {
 
     @Override
     public void detect(PdfLine pdfLine) {
+        if (ignoreLines.contains(pdfLine.getGlobalLineNo())) {
+            return;
+        }
         if (!isFindBegin) {
             if (pdfLine.containWord("合并资产负债表")) {
                 int nextLine = 1;
@@ -129,8 +135,32 @@ public class CombineBalanceDetector implements IDetector<BalanceResult> {
         BigDecimal preValue = null, currentValue = null;
         for (WordLocation wordLocation : pdfLine.getWordLocations()) {
             Section section = new Section(wordLocation.getX(), wordLocation.getX() + wordLocation.getWidth());
+            String value = wordLocation.getValue().trim();
             if (xm.isInclude(section)) {
-                itemType = ItemClassifier.getItemTypeByName(wordLocation.getValue());
+                itemType = ItemClassifier.getItemTypeByName(wordLocation.getValue().trim());
+                if (itemType == null) {
+                    List<Long> tmpIgnoreLines = new ArrayList<>();
+                    if (value.startsWith(ygyjzbdjr)) {
+                        StringBuilder sb = new StringBuilder(value);
+                        PdfLine tmpLine;
+                        int maxTryLines = 3;
+                        do {
+                            tmpLine = pdfLine.getNext();
+                            if (tmpLine != null && tmpLine.getWordLocations().size() == 1) {
+                                tmpIgnoreLines.add(tmpLine.getGlobalLineNo());
+                                sb.append(tmpLine.getWordLocations().get(0).getValue().trim());
+                                itemType = ItemClassifier.getItemTypeByName(sb.toString());
+                            }
+                            maxTryLines--;
+                        } while (itemType == null && tmpLine != null && maxTryLines > 0);
+                    }
+                    if (itemType == null) {
+                        logger.info(wordLocation.getValue() + " ----- 未被识别");
+                    } else {
+                        ignoreLines.addAll(tmpIgnoreLines);
+                    }
+                }
+
             }/* else if (fz.isInclude(section)) {
             } */ else if (qmye.isInclude(section) && itemType != null) {
                 currentValue = covert(wordLocation.getValue());
@@ -141,7 +171,7 @@ public class CombineBalanceDetector implements IDetector<BalanceResult> {
         if (itemType != null) {
             if (itemType instanceof FlowAssets) {
                 Item item = new Item(itemType, preValue, currentValue);
-                combineBalanceResult.getFlowAssets().add(item);
+                combineBalanceResult.getFlowAssets().put((FlowAssets) itemType, item);
             }
 
         }

@@ -158,6 +158,9 @@ class PDFParserTextStripper extends PDFTextStripper {
         int pageNo = 0;
         for (int i = 0; i < wordLocations.size(); i++) {
             WordLocation wordLocation = wordLocations.get(i);
+            if (wordLocation.getWidth() == 0 && wordLocation.getHeight() == 0) {
+                continue;
+            }
             if (tmpY == -1 || Math.abs(wordLocation.getY() - tmpY) > 2) {
                 tmpLine = new PdfLine();
                 tmpLine.setLineNo(pageNo);

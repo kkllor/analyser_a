@@ -43,6 +43,11 @@ public class KeyAreaDetector {
             }
         }
 
-        System.out.println(keyAreaHashMap);
+        for (KeyAreaType keyAreaType : keyAreaHashMap.keySet()) {
+            System.out.println(keyAreaType.getValue() + ":");
+            System.out.println(keyAreaHashMap.get(keyAreaType).toString());
+            boolean checkResult = keyAreaHashMap.get(keyAreaType).selfCheck();
+            System.out.println("自检结果：" + checkResult);
+        }
     }
 }
