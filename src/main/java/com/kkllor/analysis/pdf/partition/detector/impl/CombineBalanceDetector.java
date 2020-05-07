@@ -34,6 +34,7 @@ public class CombineBalanceDetector implements IDetector<BalanceResult> {
     private List<Long> ignoreLines = new ArrayList<>();
     private static final String _YGYJZBDJR = "以公允价值计量";
     private double referenceX;
+    private long flagIndex;
     private static final double DEFAULT_REFERENCE_MIN = 5;
     private static final double DEFAULT_REFERENCE_MAX = 15;
 
@@ -76,7 +77,7 @@ public class CombineBalanceDetector implements IDetector<BalanceResult> {
         } else {
             if (!isFindEnd) {
                 if (pdfLine.getGlobalLineNo() > globalBeginLineNo + 1) {
-                    if (pdfLine != null && pdfLine.containWord("法定代表人：")) {
+                    if (pdfLine != null && (pdfLine.containWord("法定代表人：") || pdfLine.containWord("公司负责人"))) {
                         endPageNo = currentPage.getPageNo();
                         endLineNo = pdfLine.getLineNo() - 1;
                         globalEndLineNo = pdfLine.getGlobalLineNo() - 1;
@@ -134,9 +135,16 @@ public class CombineBalanceDetector implements IDetector<BalanceResult> {
             String value = wordLocation.getValue().trim();
             if (xm.isInclude(section)) {
                 x = section.start;
-                double distance = value.startsWith("其中") ? DEFAULT_REFERENCE_MIN : DEFAULT_REFERENCE_MAX;
-                if (referenceX != 0 && section.start - referenceX > distance) {
-                    logger.info(value + "----检查到缩进，作为子项不统计");
+                boolean flag = value.startsWith("其中");
+                if (flag) {
+                    flagIndex = pdfLine.getGlobalLineNo();
+                    logger.info(value + "----检查到 '其中' 开头，作为子项不统计");
+                    continue;
+                }
+                //同时满足 1，缩进大于DEFAULT_REFERENCE_MIN；2，距离"其他"开头的子项距离不超过5；
+                //的时候将暂时不统计
+                if (referenceX != 0 && section.start - referenceX > DEFAULT_REFERENCE_MIN && flagIndex != 0 && (pdfLine.getGlobalLineNo() - flagIndex) < 5) {
+                    logger.info(value + "----检查到缩进，作为子项不统计，距离上一个'其他'的行" + (pdfLine.getGlobalLineNo() - flagIndex));
                     continue;
                 }
                 itemType = ItemClassifier.getItemTypeByName(wordLocation.getValue().trim());
