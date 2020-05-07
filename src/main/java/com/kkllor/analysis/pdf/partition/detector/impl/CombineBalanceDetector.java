@@ -25,21 +25,17 @@ public class CombineBalanceDetector implements IDetector<BalanceResult> {
     private static final int DETECT_LINE = 10;
     private Logger logger = LogManager.getLogger(CombineBalanceDetector.class.getSimpleName());
     private BalanceResult combineBalanceResult = new BalanceResult();
-
     boolean isFindBegin;
-
     boolean isFindEnd;
-
     private PdfPage currentPage;
-
     private int beginPageNo, beginLineNo, endPageNo, endLineNo;
     private long globalBeginLineNo, globalEndLineNo;
-
     private Section xm, fz, qmye, qcye;
-
     private List<Long> ignoreLines = new ArrayList<>();
-
-    private static final String ygyjzbdjr = "以公允价值计量";
+    private static final String _YGYJZBDJR = "以公允价值计量";
+    private double referenceX;
+    private static final double DEFAULT_REFERENCE_MIN = 5;
+    private static final double DEFAULT_REFERENCE_MAX = 15;
 
     @Override
     public KeyAreaType getType() {
@@ -132,14 +128,21 @@ public class CombineBalanceDetector implements IDetector<BalanceResult> {
 
         ItemType itemType = null;
         BigDecimal preValue = null, currentValue = null;
+        double x = 0;
         for (WordLocation wordLocation : pdfLine.getWordLocations()) {
             Section section = new Section(wordLocation.getX(), wordLocation.getX() + wordLocation.getWidth());
             String value = wordLocation.getValue().trim();
             if (xm.isInclude(section)) {
+                x = section.start;
+                double distance = value.startsWith("其中") ? DEFAULT_REFERENCE_MIN : DEFAULT_REFERENCE_MAX;
+                if (referenceX != 0 && section.start - referenceX > distance) {
+                    logger.info(value + "----检查到缩进，作为子项不统计");
+                    continue;
+                }
                 itemType = ItemClassifier.getItemTypeByName(wordLocation.getValue().trim());
                 if (itemType == null) {
                     List<Long> tmpIgnoreLines = new ArrayList<>();
-                    if (value.startsWith(ygyjzbdjr)) {
+                    if (value.startsWith(_YGYJZBDJR)) {
                         StringBuilder sb = new StringBuilder(value);
                         PdfLine tmpLine;
                         int maxTryLines = 3;
@@ -170,6 +173,9 @@ public class CombineBalanceDetector implements IDetector<BalanceResult> {
         if (itemType != null) {
             if (itemType instanceof FlowAssets) {
                 Item item = new Item(itemType, preValue, currentValue);
+                if (itemType == FlowAssets.hbzj) {
+                    referenceX = x;
+                }
                 combineBalanceResult.getFlowAssets().put((FlowAssets) itemType, item);
             } else if (itemType instanceof FixedAssets) {
                 Item item = new Item(itemType, preValue, currentValue);
