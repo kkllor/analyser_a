@@ -7,6 +7,7 @@ import com.kkllor.analysis.pdf.entity.WordLocation;
 import com.kkllor.analysis.pdf.partition.ItemClassifier;
 import com.kkllor.analysis.pdf.partition.KeyAreaType;
 import com.kkllor.analysis.pdf.partition.detector.IDetector;
+import com.kkllor.analysis.pdf.partition.detector.entity.BalanceResult;
 import com.kkllor.constants.*;
 import org.apache.http.util.TextUtils;
 import org.apache.logging.log4j.LogManager;
@@ -219,6 +220,11 @@ public class CombineBalanceDetector implements IDetector<BalanceResult> {
     @Override
     public boolean isUnique() {
         return true;
+    }
+
+    @Override
+    public boolean isFinished() {
+        return isFindEnd;
     }
 
     public static class Section {

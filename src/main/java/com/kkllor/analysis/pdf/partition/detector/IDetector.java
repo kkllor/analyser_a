@@ -25,4 +25,6 @@ public interface IDetector<T extends DetectorResult> {
     T result();
 
     boolean isUnique();
+
+    boolean isFinished();
 }

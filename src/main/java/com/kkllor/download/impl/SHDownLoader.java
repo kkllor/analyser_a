@@ -148,7 +148,7 @@ public class SHDownLoader implements IDownloader {
             return;
         }
 
-        Pattern p = Pattern.compile("\\{\\S*\\}");
+        Pattern p = Pattern.compile("\\{[\\S\\s]*\\}");
         Matcher m = p.matcher(rawResponse);
         if (m.find()) {
             rawResponse = m.group();

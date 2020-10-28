@@ -49,7 +49,7 @@ public class Entrance {
                 String code = inputCheck(scanner, "input stock code ", "unknown operation", str -> str.split(",").length > 0);
                 new Analyser().collectData(code);
             } else if ("analyse".equals(operation)) {
-                new Analyser().analyse("600300");
+                new Analyser().analyse("600580");
             } else if ("exit".equals(operation)) {
                 SHDownLoader.getInstance().exit();
                 SZDownLoader.getInstance().exit();

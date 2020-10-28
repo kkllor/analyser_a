@@ -1,4 +1,4 @@
-package com.kkllor.analysis.pdf.partition.detector.impl;
+package com.kkllor.analysis.pdf.partition.detector.entity;
 
 import com.kkllor.analysis.pdf.entity.Item;
 import com.kkllor.analysis.pdf.partition.detector.DetectorResult;

@@ -1,6 +1,7 @@
 package com.kkllor.analysis.pdf.partition.detector;
 
 import com.kkllor.analysis.pdf.partition.KeyAreaType;
+import com.kkllor.analysis.pdf.partition.detector.impl.BaseInfoDetector;
 import com.kkllor.analysis.pdf.partition.detector.impl.CombineBalanceDetector;
 
 import java.util.HashMap;
@@ -16,6 +17,8 @@ public class DetectorFactory {
         switch (type) {
             case COMBINE_BALANCE:
                 return new CombineBalanceDetector();
+            case BASE_INFO:
+                return new BaseInfoDetector();
         }
         return null;
     }
@@ -23,6 +26,7 @@ public class DetectorFactory {
     public static Map<KeyAreaType, IDetector> getSupportDetectors() {
         Map<KeyAreaType, IDetector> hashMap = new HashMap<>();
         hashMap.put(KeyAreaType.COMBINE_BALANCE, getDetector(KeyAreaType.COMBINE_BALANCE));
+        hashMap.put(KeyAreaType.BASE_INFO, getDetector(KeyAreaType.BASE_INFO));
         return hashMap;
     }
 }

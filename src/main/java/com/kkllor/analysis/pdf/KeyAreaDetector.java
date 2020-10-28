@@ -30,7 +30,9 @@ public class KeyAreaDetector {
                 IDetector detector = detectors.get(keyAreaType);
                 detector.onPageStarted(page);
                 for (PdfLine pdfLine : page.getPdfLines()) {
-                    detector.detect(pdfLine);
+                    if (!detector.isFinished()) {
+                        detector.detect(pdfLine);
+                    }
                 }
                 detector.onPageEnded(page);
             }
@@ -45,9 +47,13 @@ public class KeyAreaDetector {
 
         for (KeyAreaType keyAreaType : keyAreaHashMap.keySet()) {
             System.out.println(keyAreaType.getValue() + ":");
-            System.out.println(keyAreaHashMap.get(keyAreaType).toString());
-            boolean checkResult = keyAreaHashMap.get(keyAreaType).selfCheck();
-            System.out.println("自检结果：" + checkResult);
+            DetectorResult result = keyAreaHashMap.get(keyAreaType);
+            if (result != null) {
+                System.out.println(result.toString());
+                boolean checkResult = result.selfCheck();
+                System.out.println("自检结果：" + checkResult);
+            }
+
         }
     }
 }
